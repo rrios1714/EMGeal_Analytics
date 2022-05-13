@@ -5,6 +5,8 @@ from numpy import sort, arange
 
 def main():
     st.title('Pharyngeal EMG Experiment.')
+
+    ##### Make sidebar
     with st.sidebar:
         uploaded_file = st.file_uploader(
                 label   = 'Choose subject files',
@@ -14,7 +16,7 @@ def main():
             st.stop()
         f = h5py.File(uploaded_file, 'r')
         st.success('File received.')
-        st.balloons()
+        balloons()
 
         with st.form("my_form"):
             # Title
@@ -58,7 +60,7 @@ def main():
         chs_semg    = sort(chs_semg)
         chs_nemg    = sort(chs_nemg)
 
-    # Create figures
+    ##### Create figures
     import matplotlib.pyplot as plt
 
     fig_audio = plt.figure(figsize=(15,2))
@@ -85,11 +87,11 @@ def main():
     plt.yticks([])
     plt.legend()
 
-    # Create additional files
+    ##### Create additional files
     from scipy.io.wavfile import write
     write('audio.wav', rate=48000, data=f[f'{pointer}/audio'][:])
 
-    # Create main screen
+    ##### Create main screen
     st.header(f'Subject {sub_id[1]}. Repetition {rep+1}.')
     st.subheader('audio')
     st.audio(data='audio.wav', format='audio/wav')
@@ -101,6 +103,11 @@ def main():
 
     st.subheader('needle-EMG')
     st.pyplot(fig_nemg)
+
+@st.cache(suppress_st_warning=True)
+def balloons():
+    st.balloons()
+
 
 def normalize(x):
     return (x-x.mean())/x.std()

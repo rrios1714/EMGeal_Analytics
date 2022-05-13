@@ -1,6 +1,6 @@
 import streamlit as st
 import h5py
-from numpy import sort
+from numpy import sort, arange
 
 
 def main():
@@ -41,7 +41,7 @@ def main():
             chs_semg = st.multiselect(
                 label       = 'Channels to plot',
                 options     = list(range(20)),
-                default     = [10, 11],
+                default     = [9, 10],
                 format_func = lambda x: x+1,
             )
             chs_nemg = st.multiselect(
@@ -58,24 +58,31 @@ def main():
         chs_semg    = sort(chs_semg)
         chs_nemg    = sort(chs_nemg)
 
-    st.write(f[f'{pointer}/sEMG'].shape)
     # Create figures
     import matplotlib.pyplot as plt
 
-    fig_audio = plt.figure(figsize=(15,1))
-    plt.plot(f[f'{pointer}/audio'][:])
+    fig_audio = plt.figure(figsize=(15,2))
+    time = arange(len(f[f'{pointer}/audio'][:]))/48000
+    plt.plot(time, f[f'{pointer}/audio'][:])
+    plt.xlabel('Time (sec)', fontsize=20)
     plt.yticks([])
-    plt.xticks([])
+    # plt.xticks([])
     plt.tight_layout()
 
     fig_semg = plt.figure(figsize=(15,5))
     for i, signal in enumerate(f[f'{pointer}/sEMG'][chs_semg]):
-        plt.plot(normalize(signal) - 3*i, label=f'Ch {chs_semg[i] + 1}')
+        time = arange(len(signal))/4000
+        plt.plot(time, normalize(signal) - 3*i, label=f'Ch {chs_semg[i] + 1}')
+    plt.xlabel('Time (sec)', fontsize=18)
+    plt.yticks([])
     plt.legend()
 
     fig_nemg = plt.figure(figsize=(15,5))
     for i, signal in enumerate(f[f'{pointer}/nEMG'][chs_nemg]):
-        plt.plot(normalize(signal) - 3*i, label=f'Ch {chs_nemg[i] + 1}', color=f'C{chs_nemg[i]}')
+        time = arange(len(signal))/4000
+        plt.plot(time, normalize(signal) - 6*i, label=f'Ch {chs_nemg[i] + 1}', color=f'C{chs_nemg[i]}')
+    plt.xlabel('Time (sec)', fontsize=18)
+    plt.yticks([])
     plt.legend()
 
     # Create additional files
@@ -85,8 +92,9 @@ def main():
     # Create main screen
     st.header(f'Subject {sub_id[1]}. Repetition {rep+1}.')
     st.subheader('audio')
-    st.pyplot(fig_audio)
     st.audio(data='audio.wav', format='audio/wav')
+    st.pyplot(fig_audio)
+    
     
     st.subheader('surface-EMG')
     st.pyplot(fig_semg)

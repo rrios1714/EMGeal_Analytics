@@ -1,7 +1,7 @@
 import streamlit as st
 import h5py
 from numpy import sort, arange
-
+from streamlit import caching
 
 def main():
     st.title('Pharyngeal EMG Experiment.')
@@ -13,6 +13,7 @@ def main():
                 type    = ['hdf5'] 
         ) 
         if not uploaded_file:
+            st.experimental_singleton.clear()
             st.stop()
         f = h5py.File(uploaded_file, 'r')
         st.success('File received.')
@@ -104,7 +105,7 @@ def main():
     st.subheader('needle-EMG')
     st.pyplot(fig_nemg)
 
-@st.cache(suppress_st_warning=True)
+@st.experimental_singleton(suppress_st_warning=True)
 def balloons():
     st.balloons()
 
